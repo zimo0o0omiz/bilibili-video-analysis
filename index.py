@@ -1,9 +1,11 @@
+import getopt
+import json
 import re
 import sys
-import getopt
+from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
 
 useage = 'python index.py -u <url>'
 
@@ -29,6 +31,21 @@ def getArgs(argv):
         'url': url,
     }
 
+
+def extract_play_url_info(text):
+    pattern = r'"playUrlInfo"\s*:\s*\[\s*{.*?}\s*\]'
+    match = re.search(pattern, text, re.DOTALL)
+
+    if match:
+        json_str = "{" + match.group(0) + "}"
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            corrected = re.sub(r"\\u002F", "/", json_str)
+            return json.loads(corrected)
+    return None
+
+
 # 获取真实地址
 def getRealUrl(url):
     parse = urlparse(url)
@@ -48,16 +65,17 @@ def getRealUrl(url):
         'cache-control': 'max-age=0',
         'upgrade-insecure-requests': '1',
         'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36',
+        # 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
     }
     res = requests.get(url=url, headers=headers)
     html = res.text
-    soup = BeautifulSoup(html, 'html5lib')
+    soup = BeautifulSoup(html, 'lxml')
     scripts = soup.find_all('script')
     for script in scripts:
-        if 'readyVideoUrl:' in str(script):
-            search = re.search('readyVideoUrl: \'[\w\W]*\',', str(script))
-            group = search.group()
-            return scheme + ':' + group[len('readyVideoUrl: \''):len(group) - 2]
+        # print(script.prettify())
+        if 'playUrlInfo' in script.prettify():
+            # print(script.prettify())
+            return extract_play_url_info(script.prettify())['playUrlInfo'][0]['url']
 
 
 def main(argv):

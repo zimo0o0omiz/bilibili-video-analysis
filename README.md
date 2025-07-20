@@ -10,7 +10,7 @@ B站视频解析真实地址
 
 1. 下载或者clone仓库
     ```shell script
-    git clone https://github.com/ZimoLoveShuang/bilibili-video-analysis.git
+    git clone https://github.com/zimo0o0omiz/bilibili-video-analysis.git
     ```
 2. 安装依赖
     ```shell script
@@ -18,7 +18,7 @@ B站视频解析真实地址
     ```
 3. 命令行执行
     ```shell script
-    python index.py -u https://www.bilibili.com/video/BV15z4y1d7Zf
+    python index.py -u "https://www.bilibili.com/video/BV1C9uXzbEWF/?spm_id_from=333.1391.0.0&vd_source=c89d805105084bae4f67ab6bb6f2f3f4"
     ```
 4. 输出真实地址
     ```shell script
